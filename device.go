@@ -15,6 +15,7 @@ var TankTypes = map[string]float64{
 	"30lb_v": 410,
 	"40lb_v": 498.62,
 }
+var SensorTypes = map[byte]string{0x3: "Standard Propane", 0x4: "Top down air space", 0x5: "Bottom up water"}
 
 // MopekaProCheck represents a BLE device
 type MopekaProCheck struct {
@@ -67,6 +68,9 @@ func (d *MopekaProCheck) GetRSSI() int {
 }
 func (d *MopekaProCheck) GetAddress() string {
 	return d.address
+}
+func (d *MopekaProCheck) GetSensorType() string {
+	return SensorTypes[d.data[2]]
 }
 func (d *MopekaProCheck) GetBatteryLevel() int {
 	batteryVoltage := d.GetBatteryVoltage()
