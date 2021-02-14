@@ -37,7 +37,7 @@ func (d *MopekaProCheck) GetTempFahrenheit() float64 {
 	return (d.GetTempCelsius() * 1.8) + 32
 }
 func (d *MopekaProCheck) GetTankLevelMM() float64 {
-	rawTankLevel := int((d.data[6]<<8)+d.data[5]) & 0x3FFF
+	rawTankLevel := (int(d.data[6]<<8) + int(d.data[5])) & 0x3FFF
 	return float64(rawTankLevel) * (MopekaTankLevelCoefficientsPropane[0] + (MopekaTankLevelCoefficientsPropane[1] * d.getRawTemp()) + (MopekaTankLevelCoefficientsPropane[2] * d.getRawTemp() * d.getRawTemp()))
 }
 func (d *MopekaProCheck) GetTankLevelInches() float64 {
