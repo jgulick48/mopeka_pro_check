@@ -1,7 +1,6 @@
 package mopeka_pro_check
 
 import (
-	"log"
 	"math"
 	"time"
 
@@ -13,7 +12,7 @@ const MOPEKA_MANUFACTURER_ID = 0x0059
 var MopekaTankLevelCoefficientsPropane = []float64{0.573045, -0.002822, -0.00000535}
 var TankTypes = map[string]float64{
 	"20lb_v": 302.84,
-	"30lb_v": 410,
+	"30lb_v": 400,
 	"40lb_v": 498.62,
 }
 var SensorTypes = map[byte]string{0x3: "Standard Propane", 0x4: "Top down air space", 0x5: "Bottom up water"}
@@ -41,7 +40,6 @@ func (d *MopekaProCheck) GetTankLevelMM() float64 {
 	a := int(d.data[6]) << 8
 	b := int(d.data[5])
 	rawTankLevel := (a + b) & 0x3FFF
-	log.Printf("6: %v A: %v B:%v raw: %v", int(d.data[6]), a, b, rawTankLevel)
 	return float64(rawTankLevel) * (MopekaTankLevelCoefficientsPropane[0] + (MopekaTankLevelCoefficientsPropane[1] * d.getRawTemp()) + (MopekaTankLevelCoefficientsPropane[2] * d.getRawTemp() * d.getRawTemp()))
 }
 func (d *MopekaProCheck) GetTankLevelInches() float64 {
