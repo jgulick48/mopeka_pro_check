@@ -10,6 +10,11 @@ import (
 const MOPEKA_MANUFACTURER_ID = 0x0059
 
 var MopekaTankLevelCoefficientsPropane = []float64{0.573045, -0.002822, -0.00000535}
+var TankTypes = map[string]float64{
+	"20lb_v": 302.84,
+	"30lb_v": 410,
+	"40lb_v": 498.62,
+}
 
 // MopekaProCheck represents a BLE device
 type MopekaProCheck struct {
@@ -36,6 +41,17 @@ func (d *MopekaProCheck) GetTankLevelMM() float64 {
 }
 func (d *MopekaProCheck) GetTankLevelInches() float64 {
 	return d.GetTankLevelMM() - 25.4
+}
+func (d *MopekaProCheck) GetLevelPercent(tankType string) float64 {
+	if height, ok := TankTypes[tankType]; ok {
+		if d.GetTankLevelMM() < height {
+			return height / d.GetTankLevelMM()
+		} else {
+			return 100
+		}
+	}
+	return 0
+
 }
 func (d *MopekaProCheck) GetReadQuality() float64 {
 	return float64(d.data[6] >> 6)
