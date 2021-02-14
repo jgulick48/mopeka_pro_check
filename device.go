@@ -48,7 +48,7 @@ func (d *MopekaProCheck) GetTankLevelInches() float64 {
 func (d *MopekaProCheck) GetLevelPercent(tankType string) float64 {
 	if height, ok := TankTypes[tankType]; ok {
 		if d.GetTankLevelMM() < height {
-			return d.GetTankLevelMM() / height
+			return (d.GetTankLevelMM() / height) * 100
 		} else {
 			return 100
 		}
