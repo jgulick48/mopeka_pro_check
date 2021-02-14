@@ -46,7 +46,7 @@ func (d *MopekaProCheck) GetTankLevelInches() float64 {
 func (d *MopekaProCheck) GetLevelPercent(tankType string) float64 {
 	if height, ok := TankTypes[tankType]; ok {
 		if d.GetTankLevelMM() < height {
-			return height / d.GetTankLevelMM()
+			return d.GetTankLevelMM() / height
 		} else {
 			return 100
 		}
@@ -85,7 +85,7 @@ func (d *MopekaProCheck) GetBatteryLevel() int {
 }
 
 func (d *MopekaProCheck) GetBatteryVoltage() float64 {
-	return float64(d.data[3] & 0x7F)
+	return float64(d.data[3]&0x7F) / 32
 }
 
 func ParseDevice(a ble.Advertisement) (MopekaProCheck, bool) {
