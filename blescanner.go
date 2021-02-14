@@ -11,49 +11,50 @@ import (
 	"github.com/sausheong/ble"
 )
 
-var dur *time.Duration
-var logger *log.Logger
-var stop bool = true
-var mutex sync.RWMutex
-var devices map[string]MopekaProCheck
-
-// Handle the advertisement scan
-func adScanHandler(a ble.Advertisement) {
-	mutex.Lock()
-	if device, ok := ParseDevice(a); ok {
-		devices[device.GetAddress()] = device
-	}
-	mutex.Unlock()
+type Scanner struct {
+	dur     *time.Duration
+	stop    bool
+	mutex   sync.RWMutex
+	devices map[string]MopekaProCheck
 }
 
-func GetDevices() []MopekaProCheck {
-	deviceList := make([]MopekaProCheck, 0, len(devices))
-	for _, device := range devices {
+// Handle the advertisement scan
+func (s *Scanner) adScanHandler(a ble.Advertisement) {
+	s.mutex.Lock()
+	if device, ok := ParseDevice(a); ok {
+		s.devices[device.GetAddress()] = device
+	}
+	s.mutex.Unlock()
+}
+
+func (s *Scanner) GetDevices() []MopekaProCheck {
+	deviceList := make([]MopekaProCheck, 0, len(s.devices))
+	for _, device := range s.devices {
 		deviceList = append(deviceList, device)
 	}
 	return deviceList
 }
 
 // handler to start scanning
-func StartScan() {
-	go scan()
+func (s *Scanner) StartScan() {
+	go s.scan()
 }
 
 // handler to stop scanning
-func StopScan() {
-	stop = true
+func (s *Scanner) StopScan() {
+	s.stop = true
 }
 
 // scan goroutine
-func scan() {
-	stop = false
-	logger.Println("Started scanning every", *dur)
-	for !stop {
-		ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), *dur))
-		ble.Scan(ctx, false, adScanHandler, nil)
+func (s *Scanner) scan() {
+	s.stop = false
+	log.Println("Started scanning every", *s.dur)
+	for !s.stop {
+		ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), *s.dur))
+		ble.Scan(ctx, false, s.adScanHandler, nil)
 	}
-	logger.Println("Stopped scanning.")
-	stop = true
+	log.Println("Stopped scanning.")
+	s.stop = true
 }
 
 // reformat string for proper display of hex
