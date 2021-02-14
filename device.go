@@ -1,6 +1,7 @@
 package mopeka_pro_check
 
 import (
+	"log"
 	"math"
 	"time"
 
@@ -87,6 +88,7 @@ func (d *MopekaProCheck) GetBatteryVoltage() float64 {
 func ParseDevice(a ble.Advertisement) (MopekaProCheck, bool) {
 	data := a.ManufacturerData()
 	if data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {
+		log.Printf("Got manufacturer ID %v and data lenght of %v", int(data[0]), len(data))
 		return MopekaProCheck{}, false
 	}
 	return MopekaProCheck{
