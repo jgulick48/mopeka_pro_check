@@ -43,6 +43,13 @@ func (s *Scanner) GetDevices() []MopekaProCheck {
 	return deviceList
 }
 
+func (s *Scanner) GetDevice(addr string) (MopekaProCheck, bool) {
+	s.mutex.Lock()
+	device, ok := s.devices[addr]
+	s.mutex.Unlock()
+	return device, ok
+}
+
 // handler to start scanning
 func (s *Scanner) StartScan() {
 	go s.scan()
