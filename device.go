@@ -1,6 +1,7 @@
 package mopeka_pro_check
 
 import (
+	"math"
 	"time"
 
 	"github.com/sausheong/ble"
@@ -50,6 +51,21 @@ func (d *MopekaProCheck) GetRSSI() int {
 }
 func (d *MopekaProCheck) GetAddress() string {
 	return d.address
+}
+func (d *MopekaProCheck) GetBatteryLevel() int {
+	batteryVoltage := d.GetBatteryVoltage()
+	percent := ((batteryVoltage - 2.2) / 0.65) * 100
+	if percent > 100 {
+		return 100
+	}
+	if percent < 0 {
+		return 0
+	}
+	return int(math.Round(percent))
+}
+
+func (d *MopekaProCheck) GetBatteryVoltage() float64 {
+	return float64(d.data[3] & 0x7F)
 }
 
 func ParseDevice(a ble.Advertisement) (MopekaProCheck, bool) {
