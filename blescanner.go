@@ -66,7 +66,10 @@ func (s *Scanner) scan() {
 	log.Println("Started scanning every", *s.dur)
 	for !s.stop {
 		ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), *s.dur))
-		ble.Scan(ctx, false, s.adScanHandler, nil)
+		err := ble.Scan(ctx, false, s.adScanHandler, nil)
+		if err != nil {
+			log.Printf("Error scanning for devices %s", err)
+		}
 	}
 	log.Println("Stopped scanning.")
 	s.stop = true
