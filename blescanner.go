@@ -18,6 +18,14 @@ type Scanner struct {
 	devices map[string]MopekaProCheck
 }
 
+func NewScanner(timeout time.Duration) Scanner {
+	return Scanner{
+		dur:     &timeout,
+		mutex:   sync.RWMutex{},
+		devices: make(map[string]MopekaProCheck),
+	}
+}
+
 // Handle the advertisement scan
 func (s *Scanner) adScanHandler(a ble.Advertisement) {
 	s.mutex.Lock()
