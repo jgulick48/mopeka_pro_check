@@ -9,6 +9,7 @@ import (
 	"unicode"
 
 	"github.com/sausheong/ble"
+	"github.com/sausheong/ble/linux"
 )
 
 type Scanner struct {
@@ -19,6 +20,12 @@ type Scanner struct {
 }
 
 func NewScanner(timeout time.Duration) Scanner {
+	d, err := linux.NewDevice()
+	if err != nil {
+		log.Fatal("Can't create new device:", err)
+	}
+	ble.SetDefaultDevice(d)
+
 	return Scanner{
 		dur:     &timeout,
 		mutex:   sync.RWMutex{},
