@@ -90,6 +90,14 @@ func (d *MopekaProCheck) GetBatteryVoltage() float64 {
 	return float64(d.data[3]&0x7F) / 32
 }
 
+func FilterDevice(a ble.Advertisement) bool {
+	data := a.ManufacturerData()
+	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {
+		return false
+	}
+	return true
+}
+
 func ParseDevice(a ble.Advertisement) (MopekaProCheck, bool) {
 	data := a.ManufacturerData()
 	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {

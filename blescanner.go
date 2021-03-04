@@ -35,11 +35,15 @@ func NewScanner(timeout time.Duration) Scanner {
 
 // Handle the advertisement scan
 func (s *Scanner) adScanHandler(a ble.Advertisement) {
-	s.mutex.Lock()
 	if device, ok := ParseDevice(a); ok {
+		s.mutex.Lock()
+		defer s.mutex.Unlock()
 		s.devices[device.GetAddress()] = device
 	}
-	s.mutex.Unlock()
+}
+
+func (s *Scanner) adScanFilter(a ble.Advertisement) bool {
+	return FilterDevice(a)
 }
 
 func (s *Scanner) GetDevices() []MopekaProCheck {
@@ -73,7 +77,7 @@ func (s *Scanner) scan() {
 	log.Println("Started scanning every", *s.dur)
 	for !s.stop {
 		ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), *s.dur))
-		_ = ble.Scan(ctx, false, s.adScanHandler, nil)
+		_ = ble.Scan(ctx, false, s.adScanHandler, s.adScanFilter)
 	}
 	log.Println("Stopped scanning.")
 	s.stop = true
