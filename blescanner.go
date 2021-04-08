@@ -37,8 +37,8 @@ func NewScanner(timeout time.Duration) Scanner {
 func (s *Scanner) adScanHandler(a ble.Advertisement) {
 	if device, ok := ParseDevice(a); ok {
 		s.mutex.Lock()
-		defer s.mutex.Unlock()
 		s.devices[device.GetAddress()] = device
+		s.mutex.Unlock()
 	}
 }
 
@@ -55,9 +55,9 @@ func (s *Scanner) GetDevices() []MopekaProCheck {
 }
 
 func (s *Scanner) GetDevice(addr string) (MopekaProCheck, bool) {
-	s.mutex.Lock()
+	s.mutex.RLock()
 	device, ok := s.devices[addr]
-	s.mutex.Unlock()
+	s.mutex.RUnlock()
 	return device, ok
 }
 
