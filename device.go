@@ -100,7 +100,7 @@ func FilterDevice(a gatt.Advertisement) bool {
 
 func ParseDevice(a *gatt.Advertisement, rssi int) (MopekaProCheck, bool) {
 	data := a.ManufacturerData
-	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {
+	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 || a.LocalName == "" {
 		return MopekaProCheck{}, false
 	}
 	return MopekaProCheck{

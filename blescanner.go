@@ -22,7 +22,7 @@ type Scanner struct {
 func onStateChanged(device gatt.Device, s gatt.State) {
 	switch s {
 	case gatt.StatePoweredOn:
-		fmt.Println("Scanning for iBeacon Broadcasts...")
+		fmt.Println("Scanning for Broadcasts...")
 		device.Scan([]gatt.UUID{}, true)
 		return
 	default:
