@@ -1,6 +1,7 @@
 package mopeka_pro_check
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -103,6 +104,7 @@ func ParseDevice(a *gatt.Advertisement, rssi int) (MopekaProCheck, bool) {
 	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 || a.LocalName == "" {
 		return MopekaProCheck{}, false
 	}
+	fmt.Printf("Found advertizement %v", a)
 	return MopekaProCheck{
 		address:  a.LocalName,
 		detected: time.Now(),
