@@ -104,7 +104,10 @@ func ParseDevice(a *gatt.Advertisement, rssi int) (MopekaProCheck, bool) {
 	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {
 		return MopekaProCheck{}, false
 	}
-	fmt.Printf("Found advertizement %v", a)
+	fmt.Printf("Found advertizement %s connectable: %v, ", a.LocalName, a.Connectable)
+	if len(a.Services) > 0 {
+		fmt.Printf("Found services %s", a.Services[0].String())
+	}
 	return MopekaProCheck{
 		address:  a.LocalName,
 		detected: time.Now(),
