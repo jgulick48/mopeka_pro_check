@@ -11,9 +11,10 @@ const MOPEKA_MANUFACTURER_ID = 0x0059
 
 var MopekaTankLevelCoefficientsPropane = []float64{0.573045, -0.002822, -0.00000535}
 var TankTypes = map[string]float64{
-	"20lb_v": 302.84,
-	"30lb_v": 400,
-	"40lb_v": 498.62,
+	"20lb_v":  302.84,
+	"30lb_v":  400,
+	"40lb_v":  498.62,
+	"100lb_v": 1300,
 }
 var SensorTypes = map[byte]string{0x3: "Standard Propane", 0x4: "Top down air space", 0x5: "Bottom up water"}
 
