@@ -1,15 +1,15 @@
 package mopeka_pro_check
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"strings"
 	"sync"
 	"time"
 	"unicode"
 
-	"github.com/jgulick48/gatt"
-	"github.com/jgulick48/gatt/examples/option"
+	"github.com/sausheong/ble"
+	"github.com/sausheong/ble/linux"
 )
 
 type Scanner struct {
@@ -19,42 +19,30 @@ type Scanner struct {
 	devices map[string]MopekaProCheck
 }
 
-func onStateChanged(device gatt.Device, s gatt.State) {
-	switch s {
-	case gatt.StatePoweredOn:
-		fmt.Println("Scanning for Broadcasts...")
-		device.Scan([]gatt.UUID{}, true)
-		return
-	default:
-		device.StopScanning()
-	}
-}
-
 func NewScanner(timeout time.Duration) Scanner {
-	d, err := gatt.NewDevice(option.DefaultClientOptions...)
+	d, err := linux.NewDevice()
 	if err != nil {
 		log.Fatal("Can't create new device:", err)
 	}
-	scanner := Scanner{
+	ble.SetDefaultDevice(d)
+
+	return Scanner{
 		dur:     &timeout,
 		mutex:   sync.RWMutex{},
 		devices: make(map[string]MopekaProCheck),
 	}
-	d.Handle(gatt.PeripheralDiscovered(scanner.adScanHandler))
-	d.Init(onStateChanged)
-	return scanner
 }
 
 // Handle the advertisement scan
-func (s *Scanner) adScanHandler(p gatt.Peripheral, a *gatt.Advertisement, rssi int) {
-	if device, ok := ParseDevice(a, rssi); ok {
+func (s *Scanner) adScanHandler(a ble.Advertisement) {
+	if device, ok := ParseDevice(a); ok {
 		s.mutex.Lock()
 		s.devices[device.GetAddress()] = device
 		s.mutex.Unlock()
 	}
 }
 
-func (s *Scanner) adScanFilter(a gatt.Advertisement) bool {
+func (s *Scanner) adScanFilter(a ble.Advertisement) bool {
 	return FilterDevice(a)
 }
 
@@ -71,6 +59,28 @@ func (s *Scanner) GetDevice(addr string) (MopekaProCheck, bool) {
 	device, ok := s.devices[addr]
 	s.mutex.RUnlock()
 	return device, ok
+}
+
+// handler to start scanning
+func (s *Scanner) StartScan() {
+	go s.scan()
+}
+
+// handler to stop scanning
+func (s *Scanner) StopScan() {
+	s.stop = true
+}
+
+// scan goroutine
+func (s *Scanner) scan() {
+	s.stop = false
+	log.Println("Started scanning every", *s.dur)
+	for !s.stop {
+		ctx := ble.WithSigHandler(context.WithTimeout(context.Background(), *s.dur))
+		_ = ble.Scan(ctx, false, s.adScanHandler, s.adScanFilter)
+	}
+	log.Println("Stopped scanning.")
+	s.stop = true
 }
 
 // reformat string for proper display of hex

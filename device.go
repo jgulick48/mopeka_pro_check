@@ -1,11 +1,10 @@
 package mopeka_pro_check
 
 import (
-	"fmt"
 	"math"
 	"time"
 
-	"github.com/jgulick48/gatt"
+	"github.com/sausheong/ble"
 )
 
 const MOPEKA_MANUFACTURER_ID = 0x0059
@@ -91,28 +90,24 @@ func (d *MopekaProCheck) GetBatteryVoltage() float64 {
 	return float64(d.data[3]&0x7F) / 32
 }
 
-func FilterDevice(a gatt.Advertisement) bool {
-	data := a.ManufacturerData
+func FilterDevice(a ble.Advertisement) bool {
+	data := a.ManufacturerData()
 	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {
 		return false
 	}
 	return true
 }
 
-func ParseDevice(a *gatt.Advertisement, rssi int) (MopekaProCheck, bool) {
-	data := a.ManufacturerData
+func ParseDevice(a ble.Advertisement) (MopekaProCheck, bool) {
+	data := a.ManufacturerData()
 	if len(data) == 0 || data[0] != MOPEKA_MANUFACTURER_ID || len(data) != 12 {
 		return MopekaProCheck{}, false
 	}
-	fmt.Printf("Found advertizement %s connectable: %v, ", a.LocalName, a.Connectable)
-	if len(a.Services) > 0 {
-		fmt.Printf("Found services %s", a.Services[0].String())
-	}
 	return MopekaProCheck{
-		address:  a.LocalName,
+		address:  a.Addr().String(),
 		detected: time.Now(),
-		name:     clean(a.LocalName),
-		rssi:     rssi,
+		name:     clean(a.LocalName()),
+		rssi:     a.RSSI(),
 		data:     data,
 	}, true
 }
