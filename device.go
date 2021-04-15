@@ -5,7 +5,7 @@ import (
 	"math"
 	"time"
 
-	"github.com/paypal/gatt"
+	"github.com/jgulick48/gatt"
 )
 
 const MOPEKA_MANUFACTURER_ID = 0x0059

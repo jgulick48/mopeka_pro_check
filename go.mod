@@ -1,8 +1,5 @@
 module github.com/jgulick48/mopeka_pro_check
 
-go 1.15
+go 1.16
 
-require (
-	github.com/paypal/gatt v0.0.0-20151011220935-4ae819d591cf
-	github.com/sausheong/ble v0.0.0-20200602153014-61e07e487e3a
-)
+require github.com/jgulick48/gatt v0.0.0-20210414211054-fc7d135fda91
