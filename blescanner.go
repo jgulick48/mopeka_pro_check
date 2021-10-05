@@ -13,10 +13,11 @@ import (
 )
 
 type Scanner struct {
-	dur     *time.Duration
-	stop    bool
-	mutex   sync.RWMutex
-	devices map[string]MopekaProCheck
+	dur        *time.Duration
+	stop       bool
+	mutex      sync.RWMutex
+	devices    map[string]MopekaProCheck
+	lastUpdate time.Time
 }
 
 func NewScanner(timeout time.Duration) Scanner {
@@ -38,6 +39,7 @@ func (s *Scanner) adScanHandler(a ble.Advertisement) {
 	if device, ok := ParseDevice(a); ok {
 		s.mutex.Lock()
 		s.devices[device.GetAddress()] = device
+		s.lastUpdate = time.Now()
 		s.mutex.Unlock()
 	}
 }
@@ -69,6 +71,10 @@ func (s *Scanner) StartScan() {
 // handler to stop scanning
 func (s *Scanner) StopScan() {
 	s.stop = true
+}
+
+func (s *Scanner) GetLastUpdateTime() time.Time {
+	return s.lastUpdate
 }
 
 // scan goroutine

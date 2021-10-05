@@ -31,6 +31,10 @@ func (d *MopekaProCheck) getRawTemp() float64 {
 	return float64(d.data[4] & 0x7F)
 }
 
+func (d *MopekaProCheck) GetReadingTime() time.Time {
+	return d.detected
+}
+
 func (d *MopekaProCheck) GetTempCelsius() float64 {
 	return d.getRawTemp() - 40
 }
