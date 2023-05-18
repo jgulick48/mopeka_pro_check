@@ -15,6 +15,7 @@ var TankTypes = map[string]float64{
 	"30lb_v":  400,
 	"40lb_v":  498.62,
 	"100lb_v": 1300,
+	"500g_h":  939.8,
 }
 var SensorTypes = map[byte]string{0x3: "Standard Propane", 0x4: "Top down air space", 0x5: "Bottom up water"}
 
@@ -48,18 +49,26 @@ func (d *MopekaProCheck) GetTankLevelMM() float64 {
 	return float64(rawTankLevel) * (MopekaTankLevelCoefficientsPropane[0] + (MopekaTankLevelCoefficientsPropane[1] * d.getRawTemp()) + (MopekaTankLevelCoefficientsPropane[2] * d.getRawTemp() * d.getRawTemp()))
 }
 func (d *MopekaProCheck) GetTankLevelInches() float64 {
-	return d.GetTankLevelMM() - 25.4
+	return d.GetTankLevelMM() / 25.4
 }
 func (d *MopekaProCheck) GetLevelPercent(tankType string) float64 {
-	if height, ok := TankTypes[tankType]; ok {
-		if d.GetTankLevelMM() < height {
-			return (d.GetTankLevelMM() / height) * 100
-		} else {
-			return 100
+	switch tankType {
+	case "500g_v":
+		height, ok := TankTypes[tankType]
+		if !ok {
+			return 0
 		}
+		return CalculatePercentOfCircle(d.GetTankLevelMM(), height/2)
+	default:
+		if height, ok := TankTypes[tankType]; ok {
+			if d.GetTankLevelMM() < height {
+				return (d.GetTankLevelMM() / height) * 100
+			} else {
+				return 100
+			}
+		}
+		return 0
 	}
-	return 0
-
 }
 func (d *MopekaProCheck) GetReadQuality() float64 {
 	return float64(d.data[6] >> 6)
@@ -115,4 +124,27 @@ func ParseDevice(a ble.Advertisement) (MopekaProCheck, bool) {
 		rssi:     a.RSSI(),
 		data:     data,
 	}, true
+}
+
+func CalculatePercentOfCircle(height float64, r float64) float64 {
+	fullVol := math.Pi * math.Pow(r, 2)
+	if height == r {
+		return .5 * 100
+	}
+	if height < r {
+		theta := 2 * math.Acos((r-height)/r)
+		sintheta := math.Sin(theta)
+		pow := math.Pow(r, 2)
+		vol := .5 * pow * (theta - sintheta)
+		return (vol / fullVol) * 100
+	}
+	if height > r {
+		theta := 2 * math.Acos((height-r)/r)
+		sintheta := math.Sin(theta)
+		pow := math.Pow(r, 2)
+		vol := .5 * pow * (theta - sintheta)
+		vol = fullVol - vol
+		return (vol / fullVol) * 100
+	}
+	return 0
 }
